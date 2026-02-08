@@ -16,10 +16,13 @@ export async function POST(req: NextRequest) {
   const form = await req.formData();
   const twilioCallSid = String(form.get('CallSid') || '');
   const twilioStatus = String(form.get('CallStatus') || '');
+  const mappedStatus = mapStatus(twilioStatus);
+
+  console.log(`[twilio/status] jobId=${jobId} twilioStatus=${twilioStatus || 'n/a'} mappedStatus=${mappedStatus} callSid=${twilioCallSid || 'n/a'}`);
 
   await prisma.callJob.update({
     where: { id: jobId },
-    data: { twilioCallSid, status: mapStatus(twilioStatus) }
+    data: { twilioCallSid, status: mappedStatus }
   });
 
   return NextResponse.json({ ok: true });

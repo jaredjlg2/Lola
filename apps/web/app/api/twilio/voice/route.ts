@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
   const speechResult = String(form.get('SpeechResult') || '').trim();
   const callStatus = String(form.get('CallStatus') || '');
 
+  console.log(`[twilio/voice] jobId=${jobId} callStatus=${callStatus || 'n/a'} speechChars=${speechResult.length}`);
+
   const job = await prisma.callJob.findUnique({ where: { id: jobId }, include: { user: true, callSession: true } });
   if (!job) return new NextResponse('No job', { status: 404 });
 
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest) {
     response.say({ voice: 'alice', language: 'es-ES' }, `Hola, soy Lola. Qué alegría practicar contigo hoy. ${job.user.goals}. Empecemos. ¿Cómo estás hoy?`);
   } else {
     const history = job.callSession?.transcript
-      ? job.callSession.transcript.split('\n').slice(-8).map((line) => {
+      ? job.callSession.transcript.split('\n').slice(-8).map((line: string) => {
           const [role, ...rest] = line.split(':');
           return { role: role as 'user' | 'assistant', content: rest.join(':').trim() };
         })
@@ -41,6 +43,8 @@ export async function POST(req: NextRequest) {
       history,
       latestUserMessage: speechResult
     });
+
+    console.log(`[twilio/voice] generated reply for jobId=${jobId} chars=${ai.length}`);
 
     const transcript = `${job.callSession?.transcript || ''}\nuser: ${speechResult}\nassistant: ${ai}`.trim();
     await prisma.callSession.upsert({

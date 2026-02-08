@@ -25,6 +25,7 @@ function toUtcDateFromLocal(dayISO: string, timeHHmm: string, timezone: string):
 
 export async function scheduleCallsForNext24Hours() {
   const users = await prisma.user.findMany({ where: { isActive: true } });
+  let jobsScheduled = 0;
   for (const user of users) {
     const dayISO = toDateInTimezone(0, user.timezone);
     const localTimes = generateDailyCallTimes({
@@ -44,8 +45,10 @@ export async function scheduleCallsForNext24Hours() {
         update: {},
         create: { userId: user.id, scheduledFor, status: 'scheduled' }
       });
+      jobsScheduled += 1;
     }
   }
+  console.log(`[scheduler] prepared ${jobsScheduled} call slots across ${users.length} active users`);
 }
 
 export async function dispatchDueCalls() {
@@ -54,6 +57,8 @@ export async function dispatchDueCalls() {
     include: { user: true },
     take: 20
   });
+
+  console.log(`[scheduler] found ${dueJobs.length} due job(s)`);
 
   for (const job of dueJobs) {
     try {
