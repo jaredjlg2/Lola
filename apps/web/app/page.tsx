@@ -24,14 +24,32 @@ export default function Home() {
       preferredTimes
     };
 
-    const res = await fetch('/api/users', { method: 'POST', body: JSON.stringify(payload) });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(data.error || 'Invalid form');
-      return;
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const isJson = (res.headers.get('content-type') || '').includes('application/json');
+      const data = isJson ? await res.json() : null;
+
+      if (!res.ok) {
+        setError(data?.error || 'Unable to save right now. Please try again.');
+        return;
+      }
+
+      if (!data?.manageToken) {
+        setError('Saved, but we could not open your confirmation page. Please retry.');
+        return;
+      }
+
+      window.location.href = `/confirm?token=${encodeURIComponent(data.manageToken)}`;
+    } catch {
+      setError('Network error while saving. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
-    window.location.href = `/confirm?token=${encodeURIComponent(data.manageToken)}`;
   }
 
   return (
