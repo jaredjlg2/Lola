@@ -27,15 +27,14 @@ export async function generateTutorReply(params: {
 }) {
   const client = new OpenAI({ apiKey: params.openaiApiKey });
   const instructions = buildTutorSystemPrompt(params.profile);
-  const input = [
-    ...params.history.map((m) => ({ role: m.role, content: [{ type: 'input_text', text: m.content }] })),
-    { role: 'user' as const, content: [{ type: 'input_text' as const, text: params.latestUserMessage }] }
-  ];
+  const transcript = [...params.history, { role: 'user' as const, content: params.latestUserMessage }]
+    .map((m) => `${m.role}: ${m.content}`)
+    .join('\n');
 
   const response = await client.responses.create({
     model: params.model,
     instructions,
-    input,
+    input: transcript,
     temperature: 0.6,
     max_output_tokens: 180
   });
