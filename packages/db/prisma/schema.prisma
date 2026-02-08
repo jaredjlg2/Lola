@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = env("DATABASE_PROVIDER")
+  url      = env("DATABASE_URL")
+}
+
+enum CallJobStatus {
+  scheduled
+  in_progress
+  completed
+  failed
+  no_answer
+}
+
+model User {
+  id             String      @id @default(cuid())
+  manageToken    String      @unique
+  phoneNumber    String      @unique
+  level          String
+  vocabEstimate  Int
+  goals          String
+  timezone       String
+  callsPerDay    Int
+  preferredTimes Json
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  callJobs       CallJob[]
+  callSessions   CallSession[]
+}
+
+model CallJob {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scheduledFor  DateTime
+  status        CallJobStatus @default(scheduled)
+  twilioCallSid String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  callSession   CallSession?
+
+  @@unique([userId, scheduledFor])
+  @@index([status, scheduledFor])
+}
+
+model CallSession {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  callJobId  String   @unique
+  callJob    CallJob  @relation(fields: [callJobId], references: [id], onDelete: Cascade)
+  transcript String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}

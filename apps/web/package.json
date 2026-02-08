@@ -1,0 +1,30 @@
+{
+  "name": "@lola/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "scheduler": "tsx scripts/scheduler.ts"
+  },
+  "dependencies": {
+    "@lola/shared": "0.1.0",
+    "@lola/voice": "0.1.0",
+    "@prisma/client": "^5.22.0",
+    "jsonwebtoken": "^9.0.2",
+    "next": "15.1.5",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "twilio": "^5.4.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
