@@ -1,0 +1,18 @@
+{
+  "name": "lola-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @lola/web",
+    "build": "npm run build -w @lola/web",
+    "start": "npm run start -w @lola/web",
+    "db:generate": "npm run prisma:generate -w @lola/db",
+    "db:migrate": "npm run prisma:migrate -w @lola/db",
+    "scheduler": "npm run scheduler -w @lola/web",
+    "test": "npm run test -w @lola/shared"
+  }
+}
